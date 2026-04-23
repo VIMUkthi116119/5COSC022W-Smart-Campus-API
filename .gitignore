@@ -1,0 +1,12 @@
+target/
+*.class
+.netbeans/
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.DS_Store
+.idea/
+.vscode/
+*.log
