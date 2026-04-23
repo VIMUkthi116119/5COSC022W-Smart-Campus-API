@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * REST API Resource for managing Sensors.
- * Provides endpoints to list (with optional type filtering), retrieve, create, and update sensors.
- * Also acts as a locator for the SensorReadingResource.
+ * Resource class for managing Sensors.
+ * Path: /api/v1/sensors
+ * Handles CRUD operations, query filtering, and delegates reading-related operations to SensorReadingResource.
  */
 @Path("/api/v1/sensors")
 @Produces(MediaType.APPLICATION_JSON)
@@ -24,6 +24,11 @@ public class SensorResource {
 
     private DataStore dataStore = DataStore.getInstance();
 
+    /**
+     * Retrieves a list of all sensors.
+     * Supports optional query parameter "type" (e.g., ?type=TEMPERATURE) to filter results.
+     * Returns 200 OK with the filtered or full list of sensors.
+     */
     @GET
     public Response getAllSensors(@QueryParam("type") String type) {
         List<Sensor> sensorList = new ArrayList<>(dataStore.getSensors().values());
@@ -42,6 +47,11 @@ public class SensorResource {
         return Response.ok(sensorList).build();
     }
 
+    /**
+     * Retrieves a specific sensor by its ID.
+     * Returns 200 OK on success.
+     * Returns 404 Not Found if the sensor ID does not exist.
+     */
     @GET
     @Path("/{id}")
     public Response getSensorById(@PathParam("id") String id) {
@@ -56,6 +66,13 @@ public class SensorResource {
         return Response.ok(sensor).build();
     }
 
+    /**
+     * Registers a new Sensor and assigns it to a room.
+     * Validates that both the sensor type and room ID are provided.
+     * Returns 201 Created on success.
+     * Returns 422 Unprocessable Entity if the provided roomId does not exist,
+     * maintaining foreign key-like constraints in our in-memory data store.
+     */
     @POST
     public Response createSensor(Sensor sensor) {
         // Validate required fields
@@ -92,6 +109,13 @@ public class SensorResource {
         return Response.status(Response.Status.CREATED).entity(sensor).build();
     }
 
+    /**
+     * Updates an existing sensor's properties (type, status, roomId).
+     * Only provided fields are updated (Partial Update logic).
+     * Returns 200 OK on success.
+     * Returns 404 Not Found if the sensor does not exist.
+     * Returns 422 Unprocessable Entity if attempting to move to a non-existent room.
+     */
     @PUT
     @Path("/{id}")
     public Response updateSensor(@PathParam("id") String id, Sensor sensor) {
@@ -124,6 +148,11 @@ public class SensorResource {
         return Response.ok(existing).build();
     }
 
+    /**
+     * Sub-resource locator for Sensor Readings.
+     * Delegates all requests starting with /api/v1/sensors/{id}/readings to SensorReadingResource.
+     * This keeps the controller logic modular and adheres to REST best practices.
+     */
     @Path("/{sensorId}/readings")
     public SensorReadingResource getReadingsResource(@PathParam("sensorId") String sensorId) {
         return new SensorReadingResource(sensorId);

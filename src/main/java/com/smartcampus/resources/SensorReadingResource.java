@@ -14,7 +14,9 @@ import java.util.UUID;
 
 /**
  * Sub-resource for managing Sensor Readings.
- * Instances are created by SensorResource and handle requests for a specific sensor's readings.
+ * Path: /api/v1/sensors/{id}/readings
+ * This class is not annotated with @Path because instances are dynamically 
+ * returned by the SensorResource sub-resource locator.
  */
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -27,6 +29,11 @@ public class SensorReadingResource {
         this.sensorId = sensorId;
     }
 
+    /**
+     * Retrieves all readings for the parent sensor.
+     * Returns 200 OK with a list of readings.
+     * Returns 404 Not Found if the parent sensor ID is invalid.
+     */
     @GET
     public Response getReadings() {
         // Validate sensor exists first
@@ -41,6 +48,11 @@ public class SensorReadingResource {
         return Response.ok(readings).build();
     }
 
+    /**
+     * Adds a new reading to the parent sensor.
+     * Returns 201 Created on success.
+     * Returns 404 Not Found if attempting to add a reading to a non-existent sensor.
+     */
     @POST
     public Response addReading(SensorReading reading) {
         // Validate sensor exists first

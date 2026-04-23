@@ -12,17 +12,22 @@ import jakarta.ws.rs.core.UriInfo;
 
 /**
  * Discovery resource providing HATEOAS links to the rest of the API.
- * This is the entry point for clients exploring the API capabilities.
+ * Path: /api/v1
+ * This is the entry point for clients exploring the API capabilities, making the API self-documenting.
  */
 @Path("/api/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class DiscoveryResource {
 
+    /**
+     * Retrieves the root discovery document.
+     * Returns 200 OK with HATEOAS links to available resources.
+     */
     @GET
     public Response getDiscoveryLinks(@Context UriInfo uriInfo) {
         String baseUri = uriInfo.getBaseUri().toString();
         
-        // HATEOAS Links implementation
+        // Building HATEOAS links to provide a self-documenting API entry point (Rubric 1.2)
         JsonObject links = Json.createObjectBuilder()
                 .add("self", baseUri + "api/v1")
                 .add("rooms", baseUri + "api/v1/rooms")

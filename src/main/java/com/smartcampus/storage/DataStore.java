@@ -12,11 +12,13 @@ import java.util.stream.Collectors;
 
 /**
  * Singleton DataStore for in-memory persistence.
+ * Implements the Singleton pattern to ensure a single source of truth across the entire application lifecycle.
  */
 public class DataStore {
     private static DataStore instance;
 
-    // In-memory collections
+    // Using ConcurrentHashMap to ensure thread-safety for in-memory storage, 
+    // as JAX-RS resources are request-scoped by default and can be accessed concurrently by multiple threads.
     private Map<String, Room> rooms = new ConcurrentHashMap<>();
     private Map<String, Sensor> sensors = new ConcurrentHashMap<>();
     private Map<String, SensorReading> readings = new ConcurrentHashMap<>();

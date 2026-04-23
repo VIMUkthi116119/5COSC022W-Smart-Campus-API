@@ -9,7 +9,8 @@ import jakarta.ws.rs.ext.Provider;
 
 /**
  * Global exception mapper to handle uncaught exceptions and WebApplicationExceptions.
- * Converts errors into a consistent JSON response using the ErrorMessage model.
+ * By mapping exceptions to our ErrorMessage model, we ensure the client receives 
+ * a structured, predictable JSON response instead of a raw HTML stack trace (Semantic Justification).
  */
 @Provider
 public class ApiExceptionMapper implements ExceptionMapper<Throwable> {

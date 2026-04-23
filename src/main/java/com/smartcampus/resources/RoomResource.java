@@ -12,8 +12,9 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * REST API Resource for managing Rooms.
- * Provides endpoints to list, retrieve, create, and delete rooms.
+ * Resource class for managing Campus Rooms.
+ * Path: /api/v1/rooms
+ * Handles CRUD operations and ensures thread-safety for in-memory storage.
  */
 @Path("/api/v1/rooms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -22,12 +23,21 @@ public class RoomResource {
 
     private DataStore dataStore = DataStore.getInstance();
 
+    /**
+     * Retrieves a list of all available rooms.
+     * Returns 200 OK with a list of room objects.
+     */
     @GET
     public Response getAllRooms() {
         List<Room> rooms = new ArrayList<>(dataStore.getRooms().values());
         return Response.ok(rooms).build();
     }
 
+    /**
+     * Retrieves a specific room by its ID.
+     * Returns 200 OK on success.
+     * Returns 404 Not Found if the room ID does not exist in the DataStore.
+     */
     @GET
     @Path("/{id}")
     public Response getRoomById(@PathParam("id") String id) {
@@ -42,6 +52,11 @@ public class RoomResource {
         return Response.ok(room).build();
     }
 
+    /**
+     * Creates a new Room.
+     * Returns 201 Created on success with the generated room object.
+     * Returns 422 Unprocessable Entity if the room name is missing or invalid.
+     */
     @POST
     public Response createRoom(Room room) {
         // Validation
@@ -57,6 +72,13 @@ public class RoomResource {
         return Response.status(Response.Status.CREATED).entity(room).build();
     }
 
+    /**
+     * Deletes a specific room by its ID.
+     * Returns 204 No Content on successful deletion.
+     * Returns 404 Not Found if the room does not exist.
+     * Returns 422 Unprocessable Entity if the room still has registered sensors.
+     * This logic maintains data integrity by preventing orphaned sensors.
+     */
     @DELETE
     @Path("/{id}")
     public Response deleteRoom(@PathParam("id") String id) {
