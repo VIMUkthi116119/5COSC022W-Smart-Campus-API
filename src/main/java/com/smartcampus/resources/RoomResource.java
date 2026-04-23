@@ -76,7 +76,7 @@ public class RoomResource {
      * Deletes a specific room by its ID.
      * Returns 204 No Content on successful deletion.
      * Returns 404 Not Found if the room does not exist.
-     * Returns 422 Unprocessable Entity if the room still has registered sensors.
+     * Throws RoomNotEmptyException (409 Conflict) if the room still has registered sensors.
      * This logic maintains data integrity by preventing orphaned sensors.
      */
     @DELETE
@@ -92,9 +92,7 @@ public class RoomResource {
 
         // Validation: Don't delete if there are sensors in the room
         if (!room.getSensorIds().isEmpty()) {
-            return Response.status(422)
-                    .entity(new ErrorMessage("Cannot delete room: it still has registered sensors", 422))
-                    .build();
+            throw new com.smartcampus.exceptions.RoomNotEmptyException("Cannot delete room: it still has registered sensors");
         }
 
         dataStore.deleteRoom(id);

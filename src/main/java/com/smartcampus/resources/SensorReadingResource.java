@@ -63,6 +63,11 @@ public class SensorReadingResource {
                     .build();
         }
 
+        // Validate sensor status
+        if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus()) || "OFFLINE".equalsIgnoreCase(sensor.getStatus())) {
+            throw new com.smartcampus.exceptions.SensorUnavailableException("Cannot add reading: Sensor is currently " + sensor.getStatus());
+        }
+
         // Auto-generate ID and timestamp if not provided
         reading.setId("read-" + UUID.randomUUID().toString().substring(0, 8));
         reading.setSensorId(sensorId);

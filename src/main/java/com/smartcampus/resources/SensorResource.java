@@ -91,9 +91,7 @@ public class SensorResource {
         // Check the room actually exists
         Room room = dataStore.getRoomById(sensor.getRoomId());
         if (room == null) {
-            return Response.status(422)
-                    .entity(new ErrorMessage("The roomId provided does not exist", 422))
-                    .build();
+            throw new com.smartcampus.exceptions.LinkedResourceNotFoundException("The roomId provided does not exist");
         }
 
         if (sensor.getStatus() == null || sensor.getStatus().isEmpty()) {
@@ -137,9 +135,7 @@ public class SensorResource {
         if (sensor.getRoomId() != null && !sensor.getRoomId().isEmpty()) {
             Room room = dataStore.getRoomById(sensor.getRoomId());
             if (room == null) {
-                return Response.status(422)
-                        .entity(new ErrorMessage("Room not found", 422))
-                        .build();
+                throw new com.smartcampus.exceptions.LinkedResourceNotFoundException("Room not found");
             }
             existing.setRoomId(sensor.getRoomId());
         }
