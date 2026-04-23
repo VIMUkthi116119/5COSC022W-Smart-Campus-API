@@ -20,28 +20,46 @@
     </properties>
 
     <dependencies>
-        <!-- JAX-RS Jersey (Grizzly HTTP Server - no Spring Boot!) -->
+        <!-- 
+            JAX-RS Jersey Container (Grizzly 2)
+            Provides the core JAX-RS (JSR 370) implementation for building RESTful web services.
+            We use Grizzly as the embedded servlet container to avoid deploying a separate Tomcat/Glassfish server,
+            making the application self-contained and easy to execute.
+        -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-grizzly2-http</artifactId>
             <version>${jersey.version}</version>
         </dependency>
 
-        <!-- Jersey DI/IoC -->
+        <!-- 
+            Jersey HK2 (Dependency Injection)
+            HK2 is the default dependency injection framework used by Jersey.
+            It manages the lifecycle of our resources (request-scoped by default) and allows for 
+            features like @Context injection (e.g., injecting UriInfo for HATEOAS links).
+        -->
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
             <version>${jersey.version}</version>
         </dependency>
 
-        <!-- JSON Binding (Jakarta JSON-B) -->
+        <!-- 
+            JSON Binding (Jakarta JSON-B) Integration
+            Tells Jersey to use JSON-B for serializing (Java Objects -> JSON) and 
+            deserializing (JSON -> Java Objects) HTTP request/response payloads.
+        -->
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-binding</artifactId>
             <version>${jersey.version}</version>
         </dependency>
 
-        <!-- Jakarta JSON-B Implementation (Yasson) -->
+        <!-- 
+            Eclipse Yasson
+            This is the official reference implementation of the Jakarta JSON-B specification.
+            It provides the actual engine that converts our POJOs (Room, Sensor, etc.) to JSON strings.
+        -->
         <dependency>
             <groupId>org.eclipse</groupId>
             <artifactId>yasson</artifactId>
@@ -51,7 +69,10 @@
 
     <build>
         <plugins>
-            <!-- Compiler Plugin -->
+            <!-- 
+                Maven Compiler Plugin
+                Ensures the project is compiled using Java 17, as defined in our properties. 
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -62,7 +83,12 @@
                 </configuration>
             </plugin>
 
-            <!-- Shade Plugin: Creates a single runnable "fat" JAR -->
+            <!-- 
+                Maven Shade Plugin
+                Crucial for deployment. It packages all compiled classes AND all their dependencies 
+                (Jersey, Grizzly, Yasson) into a single, runnable "fat" JAR file.
+                This allows the lecturer to run the app simply with: java -jar target/smart-campus-api-1.0.0.jar
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -75,9 +101,11 @@
                         </goals>
                         <configuration>
                             <transformers>
+                                <!-- Defines the entry point (Main class) for the executable JAR -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.smartcampus.Main</mainClass>
                                 </transformer>
+                                <!-- Merges META-INF/services files, which is necessary for Jersey to discover its components inside a shaded JAR -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
                         </configuration>

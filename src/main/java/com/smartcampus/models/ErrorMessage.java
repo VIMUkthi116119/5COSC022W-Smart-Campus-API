@@ -1,5 +1,9 @@
 package com.smartcampus.models;
 
+/**
+ * Represents a standardized error response for the API.
+ * This ensures that all HTTP errors return a consistent JSON structure.
+ */
 public class ErrorMessage {
     private String error;
     private int statusCode;
