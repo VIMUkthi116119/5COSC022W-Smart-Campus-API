@@ -1,54 +1,89 @@
-# 5COSC022W - Smart Campus API
+# Smart Campus Sensor & Room Management API
+**(5COSC022W - Client-Server Architectures Coursework)**
 
-## Project Overview
-This project is a RESTful API designed for a Smart Campus environment, managing Rooms, Sensors, and Sensor Readings. It is built using Java and JAX-RS (Jersey), running on an embedded Grizzly HTTP Server.
+## 1. Project Overview
+This project is a high-performance RESTful API designed for a **Smart Campus** ecosystem. As the Lead Backend Architect, I have developed this system to manage campus infrastructure efficiently, specifically focusing on Room management and IoT Sensor data integration.
 
-## How to Run the Application
-### Prerequisites
-- Java Development Kit (JDK) 17 or higher
-- Apache Maven 3.6+
-- NetBeans IDE (optional, for easy execution)
+*   **Scenario:** A centralized system to monitor campus resources (Rooms) and their associated environmental sensors (Temperature, CO2, etc.).
+*   **Key Features:** 
+    *   Full CRUD for Rooms and Sensors.
+    *   Sub-resource mapping for adding and retrieving sensor readings.
+    *   HATEOAS-driven API discovery for enhanced client navigability.
+    *   Advanced custom exception handling with standardized JSON error responses.
 
-### Running via Maven (Command Line)
-1. Navigate to the root directory of the project.
-2. Build the project using Maven:
-   ```bash
-   mvn clean package
-   ```
-3. Run the generated "Fat JAR":
-   ```bash
-   java -jar target/smart-campus-api-1.0.0.jar
-   ```
+## 2. Technology Stack
+To ensure compliance with the technical constraints of the 5COSC022W module, the following stack was used:
+*   **Core Framework:** JAX-RS (Jersey Implementation) - Chosen for its robust support for RESTful annotations.
+*   **HTTP Server:** Embedded Grizzly Container - Provides a lightweight, high-performance environment without the overhead of a full application server.
+*   **Build & Dependency Tool:** Apache Maven 3.6+
+*   **Data Persistence:** Thread-safe In-memory Storage (Singleton Pattern + `ConcurrentHashMap`).
+*   **Note:** No Spring Boot or SQL databases were used, adhering strictly to the coursework brief.
 
-### Running via NetBeans
-1. Open the project in NetBeans.
-2. Right-click the project `smart-campus-api` in the Projects window.
-3. Select **Clean and Build**.
-4. Right-click the project again and select **Run**.
-5. The API will start at `http://localhost:8080/`
+## 3. Setup and Build Instructions
+Follow these steps to build and run the API locally:
 
-## API Endpoints Overview
-The API supports HATEOAS. Accessing the root endpoint provides links to available resources.
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/VIMUkthi116119/5COSC022W-Smart-Campus-API.git
+    ```
+2.  **Build with Maven:**
+    ```bash
+    mvn clean package
+    ```
+3.  **Run the Application:**
+    Navigate to the `target` folder and run the executable JAR:
+    ```bash
+    java -jar target/smart-campus-api-1.0.0.jar
+    ```
+    Alternatively, run directly via Maven:
+    ```bash
+    mvn exec:java
+    ```
+    The API will be available at: `http://localhost:8080/api/v1`
 
-- `GET /api/v1` : Discovery endpoint (HATEOAS).
-- `GET /api/v1/rooms` : List all rooms.
-- `POST /api/v1/rooms` : Create a new room.
-- `GET /api/v1/sensors` : List all sensors (Supports query parameter `?type=`).
-- `POST /api/v1/sensors` : Create a new sensor.
-- `PUT /api/v1/sensors/{id}` : Update a sensor.
-- `DELETE /api/v1/rooms/{id}` : Delete a room (validation prevents deletion if sensors exist).
-- `POST /api/v1/sensors/{id}/readings` : Add a reading to a specific sensor.
+## 4. Conceptual Report (Critical Analysis)
 
-## Lifecycle Analysis
-The software development lifecycle for this REST API followed an iterative approach:
-1. **Requirements Analysis**: Understanding the entities (Room, Sensor, Reading) and the constraints (e.g., a room cannot be deleted if it has active sensors).
-2. **Design**: Choosing the JAX-RS framework (Jersey) with an embedded Grizzly server for a lightweight, microservice-like architecture. A Singleton `DataStore` pattern using `ConcurrentHashMap` was chosen for thread-safe in-memory data persistence.
-3. **Implementation**: Developing the models, resources, and custom ExceptionMappers. Semantic HTTP status codes (201, 404, 422) were rigorously applied to ensure proper client communication.
-4. **Testing**: Manual testing using Postman to verify CRUD operations, boundary conditions (e.g., missing fields), and custom error mapping.
+### Part 1: Architecture & Discovery
+*   **Lifecycle Analysis:** In JAX-RS, Resource classes are typically request-scoped, meaning a new instance is created for every HTTP request. To prevent data loss across requests, I implemented the **Singleton Pattern** for the `DataStore` class. This ensures that all resources interact with a single, synchronized instance of the data structures.
+*   **HATEOAS Benefits:** By implementing a Discovery Endpoint (`/api/v1`), the API provides "Self-discovery." Clients receive hypermedia links in the response, allowing them to navigate the API dynamically without relying on external static documentation.
 
-## Security Risk Assessments
-While this is a basic implementation, several security aspects were considered:
-1. **Input Validation**: The API validates incoming JSON payloads. For instance, creating a room with an empty name or creating a sensor for a non-existent room yields a `422 Unprocessable Entity`.
-2. **Exception Information Leakage**: The global `ApiExceptionMapper` intercepts all exceptions. Instead of returning raw HTML stack traces (which could expose server internals to attackers), it translates exceptions into a structured JSON `ErrorMessage`.
-3. **Concurrency Issues**: Since JAX-RS creates a new resource instance per request, accessing a shared memory store can lead to race conditions. This risk is mitigated by using `ConcurrentHashMap` and synchronized blocks within the Singleton `DataStore`.
-4. **Future Enhancements**: Currently, the API lacks Authentication/Authorization. A production environment would require implementing JWT or OAuth2 to restrict access to sensitive endpoints.
+### Part 2: Room Management
+*   **List Return Options:** When listing rooms, the API returns full object representations. While this increases initial bandwidth usage compared to returning only IDs, it significantly reduces "chattiness" by preventing the client from making multiple follow-up requests to fetch details for each room.
+*   **DELETE Idempotency:** The `DELETE` operation in this API is idempotent. Regardless of whether a room is deleted once or multiple times, the final state of the server remains the same (the room does not exist). Subsequent calls return a consistent `404 Not Found` without side effects.
+
+### Part 3: Sensor Operations
+*   **Media Type Validation (@Consumes):** By using `@Consumes(MediaType.APPLICATION_JSON)`, the server automatically rejects requests with incorrect formats (like XML) with a `415 Unsupported Media Type` status, ensuring data integrity.
+*   **QueryParam vs PathParam:** I utilized `QueryParam` for filtering (e.g., `GET /sensors?type=Temperature`). This keeps the base URL clean and allows for extensible filtering options without breaking the URI structure. `PathParam` is reserved for unique resource identification.
+
+### Part 4: Sub-resources
+*   **Sub-resource Mapping:** I implemented readings as a sub-resource of sensors (`/sensors/{id}/readings`). This hierarchical structure logically groups related data, making the API more intuitive for developers and reducing the complexity of the main resource classes.
+
+### Part 5: Error Handling & Security
+*   **422 vs 404 Logic:** The API uses `422 Unprocessable Entity` when a request is syntactically correct but contains logical errors (e.g., trying to add a sensor to a Room ID that doesn't exist). This is more descriptive than a generic `404` as it indicates the resource was reachable but the payload was invalid.
+*   **Stack Trace Risks:** Direct exposure of Java stack traces in HTTP responses is a major security vulnerability. It provides attackers with information about the server's internal structure and library versions. I implemented a global `ApiExceptionMapper` to intercept all errors and return a sanitized JSON `ErrorMessage` instead.
+*   **Filters for Observability:** Instead of duplicating logging code in every method, I implemented a `ContainerResponseFilter`. This handles all request/response logging centrally, improving code maintainability (DRY principle).
+
+## 5. Sample cURL Commands
+Test the API using the following commands:
+
+```bash
+# 1. API Discovery (HATEOAS)
+curl -X GET http://localhost:8080/api/v1
+
+# 2. Add a new Room
+curl -X POST -H "Content-Type: application/json" -d "{\"id\":\"L4-01\", \"name\":\"Lab 1\", \"capacity\":30}" http://localhost:8080/api/v1/rooms
+
+# 3. Add a Sensor to the Room
+curl -X POST -H "Content-Type: application/json" -d "{\"id\":\"SN-001\", \"type\":\"Temperature\", \"unit\":\"Celsius\", \"roomId\":\"L4-01\"}" http://localhost:8080/api/v1/sensors
+
+# 4. Filter Sensors by Type
+curl -X GET "http://localhost:8080/api/v1/sensors?type=Temperature"
+
+# 5. Add a Reading to a Sensor
+curl -X POST -H "Content-Type: application/json" -d "{\"value\":24.5}" http://localhost:8080/api/v1/sensors/SN-001/readings
+```
+
+## 6. Video Demonstration Link
+**Link:** [Attached in Blackboard Submission]
+*(The video provides a full walkthrough of the code architecture and a live demonstration of all 12 test cases using Postman.)*
+
