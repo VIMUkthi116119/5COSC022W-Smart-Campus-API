@@ -1,5 +1,9 @@
 package com.smartcampus.models;
 
+/**
+ * Represents an IoT Sensor installed in a Room.
+ * Tracks the sensor's type (e.g., TEMPERATURE, HUMIDITY), status, and the room it belongs to.
+ */
 public class Sensor {
     private String id;
     private String type;

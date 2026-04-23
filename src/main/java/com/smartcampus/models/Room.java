@@ -3,6 +3,10 @@ package com.smartcampus.models;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a physical Room within the Smart Campus.
+ * A room can contain multiple IoT sensors, referenced by their IDs.
+ */
 public class Room {
     private String id;
     private String name;
