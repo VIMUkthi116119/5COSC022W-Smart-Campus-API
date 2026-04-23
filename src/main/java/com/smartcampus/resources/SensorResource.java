@@ -86,4 +86,41 @@ public class SensorResource {
 
         return Response.status(Response.Status.CREATED).entity(sensor).build();
     }
+
+    @PUT
+    @Path("/{id}")
+    public Response updateSensor(@PathParam("id") String id, Sensor sensor) {
+        Sensor existing = dataStore.getSensorById(id);
+        if (existing == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new ErrorMessage("Sensor not found", 404))
+                    .build();
+        }
+
+        if (sensor.getType() != null && !sensor.getType().isEmpty()) {
+            existing.setType(sensor.getType());
+        }
+
+        if (sensor.getStatus() != null && !sensor.getStatus().isEmpty()) {
+            existing.setStatus(sensor.getStatus());
+        }
+
+        if (sensor.getRoomId() != null && !sensor.getRoomId().isEmpty()) {
+            Room room = dataStore.getRoomById(sensor.getRoomId());
+            if (room == null) {
+                return Response.status(422)
+                        .entity(new ErrorMessage("Room not found", 422))
+                        .build();
+            }
+            existing.setRoomId(sensor.getRoomId());
+        }
+
+        dataStore.updateSensor(id, existing);
+        return Response.ok(existing).build();
+    }
+
+    @Path("/{sensorId}/readings")
+    public SensorReadingResource getReadingsResource(@PathParam("sensorId") String sensorId) {
+        return new SensorReadingResource(sensorId);
+    }
 }
