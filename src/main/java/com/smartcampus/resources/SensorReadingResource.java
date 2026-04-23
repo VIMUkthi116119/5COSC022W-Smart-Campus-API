@@ -12,6 +12,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Sub-resource for managing Sensor Readings.
+ * Instances are created by SensorResource and handle requests for a specific sensor's readings.
+ */
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class SensorReadingResource {

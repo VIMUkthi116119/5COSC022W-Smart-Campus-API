@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST API Resource for managing Rooms.
+ * Provides endpoints to list, retrieve, create, and delete rooms.
+ */
 @Path("/api/v1/rooms")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

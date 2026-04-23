@@ -12,6 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST API Resource for managing Sensors.
+ * Provides endpoints to list (with optional type filtering), retrieve, create, and update sensors.
+ * Also acts as a locator for the SensorReadingResource.
+ */
 @Path("/api/v1/sensors")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

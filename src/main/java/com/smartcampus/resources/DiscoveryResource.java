@@ -10,6 +10,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+/**
+ * Discovery resource providing HATEOAS links to the rest of the API.
+ * This is the entry point for clients exploring the API capabilities.
+ */
 @Path("/api/v1")
 @Produces(MediaType.APPLICATION_JSON)
 public class DiscoveryResource {
