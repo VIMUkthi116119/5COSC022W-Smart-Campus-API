@@ -139,4 +139,4 @@ curl -X PUT -H "Content-Type: application/json" -d "{\"id\":\"L4-01\", \"name\":
 
 ## 8. Video Demonstration Link
 
-**Link:** [Attached in Blackboard Submission / YouTube L]
+**Link:** = https://www.youtube.com/watch?v=B51TIPi8RWA
